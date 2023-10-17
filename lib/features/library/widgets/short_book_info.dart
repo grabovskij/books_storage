@@ -1,48 +1,6 @@
 import 'package:books_storage/core/extensions/widget_padding_extension.dart';
 import 'package:books_storage/domain/models/book_info.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  void onTapActiveFilledButton() {}
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: ListView.builder(
-        itemCount: 10,
-        itemBuilder: (BuildContext context, int index) {
-          return BookShortInfoWidget(
-            bookInfo: BookInfo(
-              title: 'Песнь льда и пламени',
-              author: 'Джордж Мартин',
-              year: 1996,
-              publisher: 'АСТ',
-              pageCount: 650,
-            ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-}
 
 class BookShortInfoWidget extends StatelessWidget {
   final BookInfo bookInfo;
