@@ -23,8 +23,8 @@ void main() {
       //   ),
       // );
       final allBooks = await booksDataSource.getAll();
-
       log(allBooks.toString());
+      await booksDataSource.dispose();
 
       runApp(const App());
     },

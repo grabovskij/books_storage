@@ -7,13 +7,17 @@ import 'package:sqflite/sqflite.dart';
 part 'books_data_source.freezed.dart';
 part 'books_data_source.g.dart';
 
+// Tables
 const String tableUserBooks = 'user_books';
+
+// Books table
 const String columnId = 'id';
 const String columnTitle = 'title';
 const String columnPublisher = 'publisher';
 const String columnAuthor = 'author';
 const String columnYear = 'year';
 const String columnPageCount = 'pageCount';
+
 
 @freezed
 class BookModel with _$BookModel {
@@ -74,7 +78,7 @@ class BooksDataSource {
   }
 
   Future<void> dispose() async {
-    await database.close().then((value) => isInit = false);
+    await database.close().then((_) => isInit = false);
   }
 
   Future<BookInfo> create(BookInfo book) async {
@@ -88,7 +92,12 @@ class BooksDataSource {
 
   Future<List<BookInfo>> getAll() async {
     final records = await database.query(tableUserBooks);
-    return records.map((e) => BookModel.fromJson(e).toEntity()).toList();
+
+    return records
+        .map(
+          (e) => BookModel.fromJson(e).toEntity(),
+        )
+        .toList();
   }
 
   FutureOr<void> createDatabase(Database db, int version) async {
