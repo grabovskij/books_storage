@@ -1,6 +1,5 @@
 import 'package:books_storage/core/extensions/widget_padding_extension.dart';
 import 'package:books_storage/domain/models/book_info.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class MyHomePage extends StatefulWidget {

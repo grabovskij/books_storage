@@ -42,6 +42,15 @@ class _BooksDataSourceImpl implements BooksDataSource {
     return records.map((e) => BookModel.fromJson(e).toEntity()).toList();
   }
 
+  @override
+  Future<int> remove(int id) async {
+    return database.delete(
+      tableUserBooks,
+      where: '$columnId = ?',
+      whereArgs: [id],
+    );
+  }
+
   FutureOr<void> createDatabase(Database db, int version) async {
     await db.execute(
       'CREATE TABLE $tableUserBooks ('

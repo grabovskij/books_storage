@@ -1,6 +1,8 @@
 import 'package:books_storage/core/extensions/widget_padding_extension.dart';
 import 'package:books_storage/domain/models/book_info.dart';
+import 'package:books_storage/features/library/controllers/library_manager/library_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class BookShortInfoWidget extends StatelessWidget {
   final BookInfo bookInfo;
@@ -51,6 +53,13 @@ class BookShortInfoWidget extends StatelessWidget {
             Text('${bookInfo.pageCount} стр.').paddingOnly(top: 4),
           ],
         ).paddingOnly(left: 10),
+        const Spacer(),
+        IconButton(
+          onPressed: () {
+            context.read<LibraryManager>().remove(bookInfo.id!);
+          },
+          icon: const Icon(Icons.delete),
+        )
       ],
     ).paddingSymmetric(vertical: 8, horizontal: 16);
   }

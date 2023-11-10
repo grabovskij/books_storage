@@ -1,7 +1,14 @@
 import 'package:books_storage/domain/models/book_info.dart';
-import 'package:flutter/material.dart';
+import 'package:books_storage/features/library/controllers/library_manager/library_manager.dart';
+import 'package:books_storage/features/library/states/library_states.dart';
+import 'package:books_storage/features/stream_listener/stream_builder.dart';
+import 'package:flutter/material.dart' hide StreamBuilder;
+import 'package:provider/provider.dart';
 
-import 'widgets/short_book_info.dart';
+import 'views/library_error_view.dart';
+import 'views/library_loaded_view.dart';
+import 'views/library_loading_view.dart';
+import 'widgets/book_creation_dialog.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
@@ -11,33 +18,54 @@ class LibraryPage extends StatefulWidget {
 }
 
 class _LibraryPageState extends State<LibraryPage> {
-  void onTapActiveFilledButton() {}
+  late final LibraryManager libraryManager;
+
+  @override
+  void initState() {
+    libraryManager = LibraryManager(context.read())..read();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    libraryManager.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('a'),
-      ),
-      body: ListView.builder(
-        itemCount: 10,
-        itemBuilder: (BuildContext context, int index) {
-          return BookShortInfoWidget(
-            bookInfo: BookInfo(
-              title: 'Песнь льда и пламени',
-              author: 'Джордж Мартин',
-              year: 1996,
-              publisher: 'АСТ',
-              pageCount: 650,
-            ),
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+    return Provider.value(
+      value: libraryManager,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('a'),
+        ),
+        body: StreamBuilder<LibraryState>(
+          initialState: LibraryLoadingState(),
+          stream: libraryManager.statesStream,
+          builder: (context, state) => switch (state) {
+            LibraryLoadingState() => const LibraryLoadingView(),
+            LibraryLoadedState() => LibraryLoadedView(state: state),
+            LibraryErrorState() => LibraryErrorView(state: state),
+          },
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: createBook,
+          tooltip: 'Increment',
+          child: const Icon(Icons.add),
+        ),
       ),
     );
+  }
+
+  void createBook() async {
+    final book = await showDialog<BookInfo?>(
+      context: context,
+      builder: (context) => BookCreationDialog(),
+    );
+
+    if (book != null) {
+      libraryManager.create(book);
+    }
   }
 }
