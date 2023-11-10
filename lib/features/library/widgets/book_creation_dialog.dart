@@ -3,9 +3,11 @@ import 'package:books_storage/features/library/controllers/book_manager.dart';
 import 'package:flutter/material.dart';
 
 class BookCreationDialog extends StatelessWidget {
+  final NavigatorState navigator;
   final BookManager bookManager = BookManager();
 
   BookCreationDialog({
+    required this.navigator,
     super.key,
   });
 
@@ -28,18 +30,19 @@ class BookCreationDialog extends StatelessWidget {
           TextField(onChanged: bookManager.setPagesNumber),
           Center(
             child: FilledButton(
+              onPressed: submit,
               child: const Text('Сохранить'),
-              onPressed: () async {
-                final navigator = Navigator.of(context);
-                final book = bookManager.bookStream.last;
-
-                bookManager.cancel();
-                navigator.pop(await book);
-              },
             ),
           ),
         ],
       ).paddingAll(16),
     );
+  }
+
+  Future<void> submit() async {
+    final book = bookManager.bookStream.last;
+
+    bookManager.cancel();
+    navigator.pop(await book);
   }
 }

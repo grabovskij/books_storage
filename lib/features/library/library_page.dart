@@ -61,7 +61,9 @@ class _LibraryPageState extends State<LibraryPage> {
   void createBook() async {
     final book = await showDialog<BookInfo?>(
       context: context,
-      builder: (context) => BookCreationDialog(),
+      builder: (context) => BookCreationDialog(
+        navigator: Navigator.of(context),
+      ),
     );
 
     if (book != null) {
