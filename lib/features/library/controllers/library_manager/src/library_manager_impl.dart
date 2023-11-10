@@ -1,8 +1,9 @@
 part of '../library_manager.dart';
 
-class _LibraryManager with BooksCRUD implements LibraryManager {
+class _LibraryManager with StatesEmission, BooksCRUD implements LibraryManager {
   @override
   final BooksDataSource booksDataSource;
+
   final BehaviorSubject _readAllSubject = BehaviorSubject();
   final BehaviorSubject<BookInfo> _createSubject = BehaviorSubject();
   final BehaviorSubject<int> _removeSubject = BehaviorSubject();
@@ -11,42 +12,34 @@ class _LibraryManager with BooksCRUD implements LibraryManager {
   _LibraryManager(this.booksDataSource);
 
   @override
+  StreamSink<LibraryState> get statesSink => _stateSubject.sink;
+
+  @override
   LibraryState? get state => _stateSubject.stream.value;
 
   @override
   Stream<BookInfo> get createdBookStream =>
-      _createSubject.map(addLoadingState).asyncMap(createBook);
+      _createSubject.map(emitLoadingState).asyncMap(createBook);
 
+  @override
   Stream<int> get removeBookStream =>
-      _removeSubject.map(addLoadingState).asyncMap(removeBook);
+      _removeSubject.map(emitLoadingState).asyncMap(removeBook);
 
   @override
-  Stream<LibraryState> get statesStream => MergeStream(
-        [
-          _readAllSubject.asyncMap(readBooks).map(booksToState),
-          createdBookStream.asyncMap(readBooks).map(booksToState),
-          removeBookStream.asyncMap(readBooks).map(booksToState),
-        ],
-      );
-
-  @override
-  void read() => _readAllSubject.add(null);
+  Stream<LibraryState> get statesStream => MergeStream([
+        _readAllSubject.asyncMap(readBooks).map(emitLoadedState),
+        createdBookStream.asyncMap(readBooks).map(emitLoadedState),
+        removeBookStream.asyncMap(readBooks).map(emitLoadedState),
+      ]);
 
   @override
   void create(BookInfo book) => _createSubject.add(book);
 
   @override
+  void read() => _readAllSubject.add(null);
+
+  @override
   void remove(int id) => _removeSubject.add(id);
-
-  T addLoadingState<T>(T value) {
-    _stateSubject.add(LibraryLoadingState());
-
-    return value;
-  }
-
-  LibraryState booksToState(List<BookInfo> books) {
-    return LibraryLoadedState(books: books);
-  }
 
   @override
   void close() {

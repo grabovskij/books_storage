@@ -6,6 +6,7 @@ import 'package:books_storage/features/library/states/library_states.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'src/books_crud_operations_mixin.dart';
+import 'src/states_emission_mixin.dart';
 
 part 'src/library_manager_impl.dart';
 
@@ -15,6 +16,8 @@ abstract class LibraryManager {
   Stream<BookInfo> get createdBookStream;
 
   Stream<LibraryState> get statesStream;
+
+  Stream<int> get removeBookStream;
 
   void read();
 
