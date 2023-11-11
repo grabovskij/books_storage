@@ -11,13 +11,9 @@ import 'src/states_emission_mixin.dart';
 part 'src/library_manager_impl.dart';
 
 abstract class LibraryManager {
-  LibraryState? get state;
-
-  Stream<BookInfo> get createdBookStream;
+  LibraryState get state;
 
   Stream<LibraryState> get statesStream;
-
-  Stream<int> get removeBookStream;
 
   void read();
 

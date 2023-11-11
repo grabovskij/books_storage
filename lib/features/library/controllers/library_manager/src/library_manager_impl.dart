@@ -4,47 +4,55 @@ class _LibraryManager with StatesEmission, BooksCRUD implements LibraryManager {
   @override
   final BooksDataSource booksDataSource;
 
-  final BehaviorSubject _readAllSubject = BehaviorSubject();
-  final BehaviorSubject<BookInfo> _createSubject = BehaviorSubject();
-  final BehaviorSubject<int> _removeSubject = BehaviorSubject();
-  final BehaviorSubject<LibraryState> _stateSubject = BehaviorSubject();
+  // Library state
+  final BehaviorSubject<LibraryState> _stateSubject =
+      BehaviorSubject.seeded(LibraryLoadingState());
 
-  _LibraryManager(this.booksDataSource);
+  // Library actions
+  final BehaviorSubject<dynamic> _readBooksSubject = BehaviorSubject();
+  final BehaviorSubject<BookInfo> _createBookSubject = BehaviorSubject();
+  final BehaviorSubject<int> _removeBookSubject = BehaviorSubject();
+
+  _LibraryManager(this.booksDataSource) {
+    _readBooksSubject
+        .map(emitLoadingState)
+        .asyncMap(readBooks)
+        .listen(emitLoadedState, onError: emitErrorState);
+    _createBookSubject
+        .map(emitLoadingState)
+        .asyncMap(createBook)
+        .asyncMap(readBooks)
+        .listen(emitLoadedState, onError: emitErrorState);
+    _removeBookSubject
+        .map(emitLoadingState)
+        .asyncMap(removeBook)
+        .asyncMap(readBooks)
+        .listen(emitLoadedState, onError: emitErrorState);
+  }
 
   @override
   StreamSink<LibraryState> get statesSink => _stateSubject.sink;
 
   @override
-  LibraryState? get state => _stateSubject.stream.value;
+  LibraryState get state => _stateSubject.stream.value;
 
   @override
-  Stream<BookInfo> get createdBookStream =>
-      _createSubject.map(emitLoadingState).asyncMap(createBook);
+  Stream<LibraryState> get statesStream => _stateSubject.stream;
 
   @override
-  Stream<int> get removeBookStream =>
-      _removeSubject.map(emitLoadingState).asyncMap(removeBook);
+  void read() => _readBooksSubject.add(null);
 
   @override
-  Stream<LibraryState> get statesStream => MergeStream([
-        _readAllSubject.asyncMap(readBooks).map(emitLoadedState),
-        createdBookStream.asyncMap(readBooks).map(emitLoadedState),
-        removeBookStream.asyncMap(readBooks).map(emitLoadedState),
-      ]);
+  void create(BookInfo book) => _createBookSubject.add(book);
 
   @override
-  void create(BookInfo book) => _createSubject.add(book);
-
-  @override
-  void read() => _readAllSubject.add(null);
-
-  @override
-  void remove(int id) => _removeSubject.add(id);
+  void remove(int id) => _removeBookSubject.add(id);
 
   @override
   void close() {
-    _readAllSubject.close();
-    _createSubject.close();
     _stateSubject.close();
+    _readBooksSubject.close();
+    _createBookSubject.close();
+    _removeBookSubject.close();
   }
 }

@@ -6,8 +6,12 @@ import 'package:books_storage/features/library/states/library_states.dart';
 mixin StatesEmission {
   StreamSink<LibraryState> get statesSink;
 
-  LibraryState emitLoadedState(List<BookInfo> books) {
-    return LibraryLoadedState(books: books);
+  void emitLoadedState(List<BookInfo> books) {
+    statesSink.add(LibraryLoadedState(books: books));
+  }
+
+  void emitErrorState(error) {
+    statesSink.add(LibraryErrorState(error.toString()));
   }
 
   T emitLoadingState<T>(T value) {

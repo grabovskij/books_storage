@@ -22,7 +22,8 @@ class _LibraryPageState extends State<LibraryPage> {
 
   @override
   void initState() {
-    libraryManager = LibraryManager(context.read())..read();
+    libraryManager = LibraryManager(context.read());
+    libraryManager.read();
     super.initState();
   }
 
@@ -38,10 +39,10 @@ class _LibraryPageState extends State<LibraryPage> {
       value: libraryManager,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('a'),
+          title: const Text('My library'),
         ),
         body: StreamBuilder<LibraryState>(
-          initialState: LibraryLoadingState(),
+          initialState: libraryManager.state,
           stream: libraryManager.statesStream,
           builder: (context, state) => switch (state) {
             LibraryLoadingState() => const LibraryLoadingView(),
