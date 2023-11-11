@@ -1,5 +1,7 @@
 part of '../library_manager.dart';
 
+typedef Books = List<BookInfo>;
+
 class _LibraryManager with StatesEmission, BooksCRUD implements LibraryManager {
   @override
   final BooksDataSource booksDataSource;
@@ -13,17 +15,22 @@ class _LibraryManager with StatesEmission, BooksCRUD implements LibraryManager {
   final BehaviorSubject<BookInfo> _createBookSubject = BehaviorSubject();
   final BehaviorSubject<int> _removeBookSubject = BehaviorSubject();
 
+  // Actions subscriptions
+  late StreamSubscription<Books> _readBooksSubscription;
+  late StreamSubscription<Books> _createBookSubscription;
+  late StreamSubscription<Books> _deleteBookSubscription;
+
   _LibraryManager(this.booksDataSource) {
-    _readBooksSubject
+    _readBooksSubscription = _readBooksSubject
         .map(emitLoadingState)
         .asyncMap(readBooks)
         .listen(emitLoadedState, onError: emitErrorState);
-    _createBookSubject
+    _createBookSubscription = _createBookSubject
         .map(emitLoadingState)
         .asyncMap(createBook)
         .asyncMap(readBooks)
         .listen(emitLoadedState, onError: emitErrorState);
-    _removeBookSubject
+    _deleteBookSubscription = _removeBookSubject
         .map(emitLoadingState)
         .asyncMap(removeBook)
         .asyncMap(readBooks)
@@ -50,9 +57,17 @@ class _LibraryManager with StatesEmission, BooksCRUD implements LibraryManager {
 
   @override
   void close() {
+    // State subject
     _stateSubject.close();
+
+    // Actions subjects
     _readBooksSubject.close();
     _createBookSubject.close();
     _removeBookSubject.close();
+
+    // Actions subscription
+    _readBooksSubscription.cancel();
+    _createBookSubscription.cancel();
+    _deleteBookSubscription.cancel();
   }
 }
