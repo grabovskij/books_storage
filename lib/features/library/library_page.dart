@@ -59,7 +59,7 @@ class _LibraryPageState extends State<LibraryPage> {
     );
   }
 
-  void createBook() async {
+  Future<void> createBook() async {
     final book = await showDialog<BookInfo?>(
       context: context,
       builder: (context) => BookCreationDialog(

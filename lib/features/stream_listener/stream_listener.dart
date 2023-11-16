@@ -95,7 +95,7 @@ class _BlocListenerBaseState<S>
 
     if (oldObservable != currentObservable) {
       _observable = currentObservable;
-      _state = _observable.state ?? oldObservable.state ?? widget.initialState!;
+      _state = _observable.state ?? oldObservable.state ?? widget.initialState;
     }
   }
 
