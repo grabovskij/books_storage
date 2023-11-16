@@ -14,28 +14,33 @@ class BookCreationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text('Название'),
-          TextField(onChanged: bookManager.setTitle),
-          const Text('Автор'),
-          TextField(onChanged: bookManager.setAuthor),
-          const Text('Год'),
-          TextField(onChanged: bookManager.setYear),
-          const Text('Издательство'),
-          TextField(onChanged: bookManager.setPublisher),
-          const Text('Страниц'),
-          TextField(onChanged: bookManager.setPagesNumber),
-          Center(
-            child: FilledButton(
-              onPressed: submit,
-              child: const Text('Сохранить'),
+      child: InkWell(
+        splashFactory: NoSplash.splashFactory,
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Название'),
+            TextField(onChanged: bookManager.setTitle),
+            const Text('Автор'),
+            TextField(onChanged: bookManager.setAuthor),
+            const Text('Год'),
+            TextField(onChanged: bookManager.setYear),
+            const Text('Издательство'),
+            TextField(onChanged: bookManager.setPublisher),
+            const Text('Страниц'),
+            TextField(onChanged: bookManager.setPagesNumber),
+            Center(
+              child: FilledButton(
+                // onPressed: null,
+                onPressed: submit,
+                child: const Text('Сохранить'),
+              ),
             ),
-          ),
-        ],
-      ).paddingAll(16),
+          ],
+        ).paddingAll(16),
+      ),
     );
   }
 

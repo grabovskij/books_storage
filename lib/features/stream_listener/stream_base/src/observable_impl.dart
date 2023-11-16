@@ -1,23 +1,4 @@
-import 'dart:async';
-
-abstract class Observable<State> {
-  factory Observable.fromStream({
-    required Stream<State> stream,
-    State? initial,
-  }) =>
-      _Observable(
-        stream,
-        initial: initial,
-      );
-
-  Stream<State> get stream;
-
-  State? get state;
-
-  bool get hasState;
-
-  FutureOr<void> close();
-}
+part of '../stream_base.dart';
 
 class _Observable<State> implements Observable<State> {
   late final StreamController<State> _streamController;
@@ -26,9 +7,12 @@ class _Observable<State> implements Observable<State> {
 
   _Observable(
     Stream<State> stream, {
+    bool sync = false,
     State? initial,
   }) {
-    _streamController = StreamController.broadcast()..addStream(stream);
+    _streamController = StreamController.broadcast(
+      sync: sync,
+    )..addStream(stream);
 
     if (initial != null) {
       _state = initial;
@@ -47,7 +31,10 @@ class _Observable<State> implements Observable<State> {
   bool get hasState => _state != null;
 
   @override
-  Future<void> close() => _subscription.cancel();
+  void close() {
+    _streamController.close();
+    _subscription.cancel();
+  }
 
   void _subscribe() {
     _streamController.stream.listen((event) {

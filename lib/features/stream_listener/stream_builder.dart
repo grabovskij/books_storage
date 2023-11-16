@@ -3,23 +3,27 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
-import 'stream_base.dart';
+import 'stream_base/stream_base.dart';
 import 'stream_listener.dart';
 
-typedef BlocWidgetBuilder<State> = Widget Function(
-    BuildContext context, State state);
+typedef StreamWidgetBuilder<State> = Widget Function(
+  BuildContext context,
+  State state,
+);
 
-typedef BlocBuilderCondition<State> = bool Function(
-    State previous, State current);
+typedef StreamBuilderCondition<State> = bool Function(
+  State previous,
+  State current,
+);
 
-class StreamBuilder<S> extends BlocBuilderBase<S> {
-  final BlocWidgetBuilder<S> builder;
+class StreamBuilder<S> extends StreamBuilderBase<S> {
+  final StreamWidgetBuilder<S> builder;
 
   const StreamBuilder({
     required this.builder,
     required S initialState,
     Stream<S>? stream,
-    BlocBuilderCondition<S>? buildWhen,
+    StreamBuilderCondition<S>? buildWhen,
     Key? key,
   }) : super(
           buildWhen: buildWhen,
@@ -32,12 +36,12 @@ class StreamBuilder<S> extends BlocBuilderBase<S> {
   Widget build(BuildContext context, S state) => builder(context, state);
 }
 
-abstract class BlocBuilderBase<S> extends StatefulWidget {
+abstract class StreamBuilderBase<S> extends StatefulWidget {
   final S initialState;
   final Stream<S>? stream;
-  final BlocBuilderCondition<S>? buildWhen;
+  final StreamBuilderCondition<S>? buildWhen;
 
-  const BlocBuilderBase({
+  const StreamBuilderBase({
     required this.initialState,
     this.buildWhen,
     this.stream,
@@ -47,10 +51,10 @@ abstract class BlocBuilderBase<S> extends StatefulWidget {
   Widget build(BuildContext context, S state);
 
   @override
-  State<BlocBuilderBase<S>> createState() => _BlocBuilderBaseState<S>();
+  State<StreamBuilderBase<S>> createState() => _StreamBuilderBaseState<S>();
 }
 
-class _BlocBuilderBaseState<S> extends State<BlocBuilderBase<S>> {
+class _StreamBuilderBaseState<S> extends State<StreamBuilderBase<S>> {
   late Observable<S> _observable;
   late S _state;
 
@@ -58,49 +62,48 @@ class _BlocBuilderBaseState<S> extends State<BlocBuilderBase<S>> {
   void initState() {
     super.initState();
     _observable = Observable.fromStream(
-        stream: widget.stream ?? context.read<Stream<S>>());
-    _observable.state;
-    _state = widget.initialState;
+      stream: widget.stream ?? context.read<Stream<S>>(),
+    );
+    _state = _observable.state ?? widget.initialState;
   }
 
-  // @override
-  // void didUpdateWidget(BlocBuilderBase<S> oldWidget) {
-  //   super.didUpdateWidget(oldWidget);
-  //   final oldObservable = Observable.fromStream(
-  //       stream: oldWidget.stream ?? context.read<Stream<S>>());
-  //
-  //   late final Observable<S> currentObservable;
-  //
-  //   if (widget.stream != null) {
-  //     currentObservable = Observable.fromStream(
-  //       stream: widget.stream!,
-  //     );
-  //   } else {
-  //     currentObservable = oldObservable;
-  //   }
-  //
-  //   if (oldObservable != currentObservable) {
-  //     _observable = currentObservable;
-  //     _state = _observable.state ?? oldObservable.state ?? widget.initialState!;
-  //   }
-  // }
+  @override
+  void didUpdateWidget(StreamBuilderBase<S> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldObservable = Observable.fromStream(
+        stream: oldWidget.stream ?? context.read<Stream<S>>());
 
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  //   final bloc = widget.bloc ?? context.read<B>();
-  //   if (_bloc != bloc) {
-  //     _bloc = bloc;
-  //     _state = _bloc.state;
-  //   }
-  // }
+    late final Observable<S> currentObservable;
+
+    if (widget.stream != null) {
+      currentObservable = Observable.fromStream(
+        stream: widget.stream!,
+      );
+    } else {
+      currentObservable = oldObservable;
+    }
+
+    if (oldObservable != currentObservable) {
+      _observable = currentObservable;
+      _state = _observable.state ?? oldObservable.state ?? widget.initialState!;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final observable = Observable.fromStream(
+      stream: widget.stream ?? context.read<Stream<S>>(),
+    );
+
+    if (_observable != observable) {
+      _observable = observable;
+      _state = _observable.state ?? widget.initialState;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // if (widget.bloc == null) {
-    //   context.select<B, bool>((bloc) => identical(_bloc, bloc));
-    // }
-
     return StreamListener<S>(
       stream: _observable.stream,
       listenWhen: widget.buildWhen,
